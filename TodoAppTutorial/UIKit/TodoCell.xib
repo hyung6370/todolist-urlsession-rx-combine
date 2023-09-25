@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TodoCell" rowHeight="209" id="0X2-EY-VXm" customClass="TodoCell" customModule="TodoAppTutorial" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="721" height="209"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="0X2-EY-VXm" id="r02-PP-wyQ">
+                <rect key="frame" x="0.0" y="0.0" width="721" height="209"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="751" text="todoId: 01" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K4X-yz-zbD">
+                        <rect key="frame" x="20" y="9.9999999999999982" width="76" height="20.333333333333329"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bm1-6K-6PD">
+                        <rect key="frame" x="20" y="52.333333333333329" width="551" height="146.66666666666669"/>
+                        <mutableString key="text">할 일 내용 할 일 내용 할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용할 일 내용 할 일 내용</mutableString>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="tyM-oC-v5X">
+                        <rect key="frame" x="581" y="10" width="130" height="34.333333333333336"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1qZ-rc-gzg">
+                                <rect key="frame" x="0.0" y="0.0" width="60" height="34.333333333333336"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="60" id="vSs-YJ-nWB"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="수정"/>
+                                <connections>
+                                    <action selector="onEditBtnClicked:" destination="0X2-EY-VXm" eventType="touchUpInside" id="WJu-tl-rio"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jJQ-Uj-3NS">
+                                <rect key="frame" x="70" y="0.0" width="60" height="34.333333333333336"/>
+                                <color key="tintColor" red="0.61907339100000003" green="0.35097110269999998" blue="0.93638724090000003" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="삭제"/>
+                                <connections>
+                                    <action selector="onDeleteBtnClicked:" destination="0X2-EY-VXm" eventType="touchUpInside" id="oKl-pZ-uPi"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                    </stackView>
+                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oUh-05-2z7">
+                        <rect key="frame" x="662" y="59" width="51" height="31"/>
+                    </switch>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Bm1-6K-6PD" firstAttribute="leading" secondItem="K4X-yz-zbD" secondAttribute="leading" id="2d3-1p-98R"/>
+                    <constraint firstItem="oUh-05-2z7" firstAttribute="top" secondItem="tyM-oC-v5X" secondAttribute="bottom" constant="14.666666666666664" id="6Aa-3x-h1s"/>
+                    <constraint firstItem="oUh-05-2z7" firstAttribute="trailing" secondItem="tyM-oC-v5X" secondAttribute="trailing" id="6RG-eO-dzM"/>
+                    <constraint firstItem="K4X-yz-zbD" firstAttribute="top" secondItem="r02-PP-wyQ" secondAttribute="top" constant="10" id="CvZ-eC-xoJ"/>
+                    <constraint firstItem="K4X-yz-zbD" firstAttribute="leading" secondItem="r02-PP-wyQ" secondAttribute="leading" constant="20" symbolic="YES" id="DXZ-Di-hFi"/>
+                    <constraint firstItem="tyM-oC-v5X" firstAttribute="leading" secondItem="Bm1-6K-6PD" secondAttribute="trailing" constant="10" id="TcT-gc-2na"/>
+                    <constraint firstAttribute="bottom" secondItem="Bm1-6K-6PD" secondAttribute="bottom" constant="10" id="VNv-o0-6PR"/>
+                    <constraint firstItem="tyM-oC-v5X" firstAttribute="top" secondItem="K4X-yz-zbD" secondAttribute="top" id="bjm-XQ-c7b"/>
+                    <constraint firstItem="Bm1-6K-6PD" firstAttribute="top" secondItem="K4X-yz-zbD" secondAttribute="bottom" constant="22" id="qXJ-Ub-AsR"/>
+                    <constraint firstAttribute="trailing" secondItem="tyM-oC-v5X" secondAttribute="trailing" constant="10" id="wjM-99-ttQ"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="contentLabel" destination="Bm1-6K-6PD" id="WyM-ZV-IIM"/>
+                <outlet property="selectionSwitch" destination="oUh-05-2z7" id="Hr1-hD-iAe"/>
+                <outlet property="titleLabel" destination="K4X-yz-zbD" id="1GQ-H6-TMK"/>
+            </connections>
+            <point key="canvasLocation" x="251.14503816793894" y="-30.633802816901412"/>
+        </tableViewCell>
+    </objects>
+</document>
