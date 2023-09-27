@@ -21,6 +21,7 @@ enum TodosAPI {
     enum APIError: Error {
         case noContent
         case decodingError
+        case jsonEncoding
         case unauthorized
         case notAllowedUrl
         case badStatus(code: Int)
@@ -30,6 +31,7 @@ enum TodosAPI {
             switch self {
             case .noContent: return "데이터가 없습니다."
             case .decodingError: return "디코딩 에러입니다."
+            case .jsonEncoding: return "유효한 json 형식이 아닙니다."
             case .unauthorized: return "인증되지 않은 사용자입니다."
             case .notAllowedUrl: return "올바른 URL 형식이 아닙니다."
             case let .badStatus(code): return "에러 상태코드: \(code)"
@@ -271,6 +273,246 @@ enum TodosAPI {
         urlRequest.addValue(form.contentType, forHTTPHeaderField: "Content-Type")
         
         urlRequest.httpBody = form.bodyData
+        
+        // 2. urlSession으로 API를 호출한다
+        // 3. API 호출에 대한 응답을 받는다
+        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
+            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+            print("err: \(err)")
+            
+            
+            if let error = err {
+                return completion(.failure(APIError.unknown(error)))
+            }
+              
+              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
+              // we verify the that status code is in the 200 range which signals all went well with the GET request
+            guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                print("bad status code")
+                return completion(.failure(APIError.unknown(nil)))
+            }
+            
+            switch httpResponse.statusCode {
+            case 401:
+                return completion(.failure(APIError.unauthorized))
+            case 204:
+                return completion(.failure(APIError.noContent))
+            default: print("default")
+            }
+            
+            if !(200...299).contains(httpResponse.statusCode) {
+                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
+            }
+
+            
+            if let jsonData = data {
+                // convert data to our swift model
+                do {
+                    // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
+                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+
+                    
+                    completion(.success(baseResponse))
+                } catch {
+                  // decoding error
+                    completion(.failure(APIError.decodingError))
+                }
+              }
+        }.resume()
+    }
+    
+    
+    // 할 일 추가하기 - JSON 방식
+    
+    /// <#Description#>
+    /// - Parameters:
+    ///   - title: 할 일 타이틀
+    ///   - isDone: 할 일 완료 여부
+    ///   - completion: 응답 결과
+    static func addATodoJson(title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+        
+        // 1. urlRequest를 만든다
+        let urlString = baseURL + "/todos-json"
+        guard let url = URL(string: urlString) else {
+            return completion(.failure(APIError.notAllowedUrl))
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "accept")
+        
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let requestParams: [String: Any] = ["title": title, "is_done": "\(isDone)"]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: requestParams, options: [.prettyPrinted])
+            urlRequest.httpBody = jsonData
+            
+        }
+        catch {
+            return completion(.failure(APIError.jsonEncoding))
+        }
+        
+        // 2. urlSession으로 API를 호출한다
+        // 3. API 호출에 대한 응답을 받는다
+        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
+            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+            print("err: \(err)")
+            
+            
+            if let error = err {
+                return completion(.failure(APIError.unknown(error)))
+            }
+              
+              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
+              // we verify the that status code is in the 200 range which signals all went well with the GET request
+            guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                print("bad status code")
+                return completion(.failure(APIError.unknown(nil)))
+            }
+            
+            switch httpResponse.statusCode {
+            case 401:
+                return completion(.failure(APIError.unauthorized))
+            case 204:
+                return completion(.failure(APIError.noContent))
+            default: print("default")
+            }
+            
+            if !(200...299).contains(httpResponse.statusCode) {
+                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
+            }
+
+            
+            if let jsonData = data {
+                // convert data to our swift model
+                do {
+                    // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
+                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+
+                    
+                    completion(.success(baseResponse))
+                } catch {
+                  // decoding error
+                    completion(.failure(APIError.decodingError))
+                }
+              }
+        }.resume()
+    }
+    
+    
+    
+    // 할 일 수정하기 - JSON 방식
+    
+    /// <#Description#>
+    /// - Parameters:
+    ///   - id : 수정할 아이템 아이디
+    ///   - title: 타이틀
+    ///   - isDone: 완료 여부
+    ///   - completion: 응답 결과
+    static func editTodoJson(id: Int, title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+        
+        // 1. urlRequest를 만든다
+        let urlString = baseURL + "/todos-json/\(id)"
+        guard let url = URL(string: urlString) else {
+            return completion(.failure(APIError.notAllowedUrl))
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "accept")
+        
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let requestParams: [String: Any] = ["title": title, "is_done": "\(isDone)"]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: requestParams, options: [.prettyPrinted])
+            urlRequest.httpBody = jsonData
+            
+        }
+        catch {
+            return completion(.failure(APIError.jsonEncoding))
+        }
+        
+        // 2. urlSession으로 API를 호출한다
+        // 3. API 호출에 대한 응답을 받는다
+        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
+            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+            print("err: \(err)")
+            
+            
+            if let error = err {
+                return completion(.failure(APIError.unknown(error)))
+            }
+              
+              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
+              // we verify the that status code is in the 200 range which signals all went well with the GET request
+            guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                print("bad status code")
+                return completion(.failure(APIError.unknown(nil)))
+            }
+            
+            switch httpResponse.statusCode {
+            case 401:
+                return completion(.failure(APIError.unauthorized))
+            case 204:
+                return completion(.failure(APIError.noContent))
+            default: print("default")
+            }
+            
+            if !(200...299).contains(httpResponse.statusCode) {
+                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
+            }
+
+            
+            if let jsonData = data {
+                // convert data to our swift model
+                do {
+                    // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
+                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+
+                    
+                    completion(.success(baseResponse))
+                } catch {
+                  // decoding error
+                    completion(.failure(APIError.decodingError))
+                }
+              }
+        }.resume()
+    }
+    
+    
+    
+    // 할 일 수정하기 - PUT urlEncoded
+    
+    /// <#Description#>
+    /// - Parameters:
+    ///   - id : 수정할 아이템 아이디
+    ///   - title: 타이틀
+    ///   - isDone: 완료 여부
+    ///   - completion: 응답 결과
+    static func editTodo(id: Int, title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+        
+        // 1. urlRequest를 만든다
+        let urlString = baseURL + "/todos/\(id)"
+        guard let url = URL(string: urlString) else {
+            return completion(.failure(APIError.notAllowedUrl))
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "PUT"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "accept")
+
+        urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        
+        let requestParams: [String: String] = ["title": title, "is_done": "\(isDone)"]
+        
+        urlRequest.percentEncodeParameters(parameters: requestParams)
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다

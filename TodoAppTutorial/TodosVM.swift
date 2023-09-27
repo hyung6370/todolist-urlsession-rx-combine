@@ -12,7 +12,7 @@ class TodosVM: ObservableObject {
     init() {
         print(#fileID, #function, #line, "- ")
         
-        TodosAPI.addATodo(title: "조져 공부!", isDone: false, completion: { [weak self] result in
+        TodosAPI.editTodo(id: 4795, title: "조져 공부에버랜드22222222222!", isDone: true, completion: { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let aTodoResponse):

@@ -24,6 +24,7 @@
 		BD9728392AC01A40007B679A /* TodosResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9728382AC01A40007B679A /* TodosResponse.swift */; };
 		BD9728A62AC29203007B679A /* URL+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9728A52AC29202007B679A /* URL+Ext.swift */; };
 		BD9728A92AC29E94007B679A /* MultipartForm in Frameworks */ = {isa = PBXBuildFile; productRef = BD9728A82AC29E94007B679A /* MultipartForm */; };
+		BD9728D62AC4561E007B679A /* URLRequest+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9728D52AC4561E007B679A /* URLRequest+Ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		BD9728352AC0062F007B679A /* TodosVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosVM.swift; sourceTree = "<group>"; };
 		BD9728382AC01A40007B679A /* TodosResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosResponse.swift; sourceTree = "<group>"; };
 		BD9728A52AC29202007B679A /* URL+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Ext.swift"; sourceTree = "<group>"; };
+		BD9728D52AC4561E007B679A /* URLRequest+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLRequest+Ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				BD9728A52AC29202007B679A /* URL+Ext.swift */,
+				BD9728D52AC4561E007B679A /* URLRequest+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -235,6 +238,7 @@
 				BD9727D12ABB2096007B679A /* TodosView.swift in Sources */,
 				BD9727BA2AB9DC3C007B679A /* ContentView.swift in Sources */,
 				BD9728392AC01A40007B679A /* TodosResponse.swift in Sources */,
+				BD9728D62AC4561E007B679A /* URLRequest+Ext.swift in Sources */,
 				BD9727C92AB9DE30007B679A /* MainVC.swift in Sources */,
 				BD9728362AC0062F007B679A /* TodosVM.swift in Sources */,
 				BD9727D42ABB2700007B679A /* Button+Style.swift in Sources */,
