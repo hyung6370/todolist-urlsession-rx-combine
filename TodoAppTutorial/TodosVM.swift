@@ -18,18 +18,24 @@ class TodosVM: ObservableObject {
     init() {
         print(#fileID, #function, #line, "- ")
         
-        TodosAPI.fetchTodosWithObservable()
+        TodosAPI.addATodoAndFetchTodosWithObservable(title: "오늘은 추석, 내가 추가함!") // [Todo]
             .observe(on: MainScheduler.instance)
-            .compactMap {$0.data}
-            .catch({ err in
-                print("TodosVM - catch: err: \(err)")
-                return Observable.just([])
-            }) // []
             .subscribe(onNext: { [weak self] (response: [Todo]) in
-                print("TodosVM - fetchTodosWithObservable: response: \(response)")
-            }, onError: { [weak self] failure in
-                self?.handleError(failure)
+                print("TodosVM - addATodoAndFetchTodosWithObservable: response: \(response)")
             }).disposed(by: disposeBag)
+        
+//        TodosAPI.fetchTodosWithObservable()
+//            .observe(on: MainScheduler.instance)
+//            .compactMap {$0.data}
+//            .catch({ err in
+//                print("TodosVM - catch: err: \(err)")
+//                return Observable.just([])
+//            }) // []
+//            .subscribe(onNext: { [weak self] (response: [Todo]) in
+//                print("TodosVM - fetchTodosWithObservable: response: \(response)")
+//            }, onError: { [weak self] failure in
+//                self?.handleError(failure)
+//            }).disposed(by: disposeBag)
         
 //        TodosAPI.fetchTodosWithObservableResult()
 //            .observe(on: MainScheduler.instance)

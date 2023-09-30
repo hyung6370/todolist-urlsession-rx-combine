@@ -138,11 +138,11 @@ extension TodosAPI {
     
     
     // 특정 할 일 가져오기
-    static func fetchATodoWithObservable(id: Int, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+    static func fetchATodoWithObservable(id: Int) -> Observable<BaseResponse<Todo>> {
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos" + "/\(id)"
         guard let url = URL(string: urlString) else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -151,69 +151,48 @@ extension TodosAPI {
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
-
-            
-            if let jsonData = data {
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map({ (urlResponse: HTTPURLResponse, data: Data) -> BaseResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+                  
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
+                }
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
+                
                 // convert data to our swift model
                 do {
                     // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+                    let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: data)
 
-                    
-                    completion(.success(baseResponse))
+                    return baseResponse
                 } catch {
-                  // decoding error
-                    completion(.failure(APIError.decodingError))
+                    throw APIError.decodingError
                 }
-              }
-        }.resume()
+            })
     }
     
     // 할 일 검색하기
-    static func searchTodosWithObservable(searchTerm: String, page: Int = 1, completion: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) {
-        // 1. urlRequest를 만든다
-//        let urlString = baseURL + "/todos/search" + "?page=\(page)" + "&query=\(searchTerm)"
-        
+    static func searchTodosWithObservable(searchTerm: String, page: Int = 1) -> Observable<BaseListResponse<Todo>> {
         
         let requestUrl = URL(baseUrl: baseURL + "/todos/search", queryItems: ["query": searchTerm, "page": "\(page)"])
-        
-        
-//        var urlComponents = URLComponents(string: baseURL + "/todos/search")
-//        urlComponents?.queryItems = [
-//            URLQueryItem(name: "page", value: "\(page)"),
-//            URLQueryItem(name: "query", value: searchTerm)
-//        ]
+
         
         guard let url = requestUrl else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -222,57 +201,49 @@ extension TodosAPI {
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
-
-            
-            if let jsonData = data {
-                // convert data to our swift model
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map { (urlResponse: HTTPURLResponse, data: Data) -> BaseListResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+                
+                  // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
+                  // we verify the that status code is in the 200 range which signals all went well with the GET request
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
+                }
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
+                
                 do {
                     // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let listResponse = try JSONDecoder().decode(BaseListResponse<Todo>.self, from: jsonData)
+                  let listResponse = try JSONDecoder().decode(BaseListResponse<Todo>.self, from: data)
                   let todos = listResponse.data
                     print("todosResponse: \(listResponse)")
                     
                     // 상태코드는 200인데, 파싱한 데이터에 따라서 에러 처리
                     guard let todos = todos,
                           !todos.isEmpty else {
-                        return completion(.failure(APIError.noContent))
+                        throw APIError.noContent
                     }
                     
-                    completion(.success(listResponse))
+                    return listResponse
                 } catch {
                   // decoding error
-                    completion(.failure(APIError.decodingError))
+                    throw APIError.decodingError
                 }
-              }
-        }.resume()
+
+            }
     }
     
     // 할 일 추가하기
@@ -282,12 +253,12 @@ extension TodosAPI {
     ///   - title: 할 일 타이틀
     ///   - isDone: 할 일 완료 여부
     ///   - completion: 응답 결과
-    static func addATodoWithObservable(title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+    static func addATodoWithObservable(title: String, isDone: Bool = false) -> Observable<BaseResponse<Todo>> {
         
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos"
         guard let url = URL(string: urlString) else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -307,50 +278,40 @@ extension TodosAPI {
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map { (urlResponse: HTTPURLResponse, data: Data) -> BaseResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+                  
+                  // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
+                  // we verify the that status code is in the 200 range which signals all went well with the GET request
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
+                }
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
 
-            
-            if let jsonData = data {
-                // convert data to our swift model
                 do {
                     // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: data)
 
-                    
-                    completion(.success(baseResponse))
+                    return baseResponse
                 } catch {
                   // decoding error
-                    completion(.failure(APIError.decodingError))
+                    throw APIError.decodingError
                 }
-              }
-        }.resume()
+            }
     }
     
     
@@ -361,12 +322,12 @@ extension TodosAPI {
     ///   - title: 할 일 타이틀
     ///   - isDone: 할 일 완료 여부
     ///   - completion: 응답 결과
-    static func addATodoJsonWithObservable(title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+    static func addATodoJsonWithObservable(title: String, isDone: Bool = false) -> Observable<BaseResponse<Todo>> {
         
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos-json"
         guard let url = URL(string: urlString) else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -383,55 +344,38 @@ extension TodosAPI {
             
         }
         catch {
-            return completion(.failure(APIError.jsonEncoding))
+            return Observable.error(APIError.jsonEncoding)
         }
-        
-        // 2. urlSession으로 API를 호출한다
-        // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
 
-            
-            if let jsonData = data {
-                // convert data to our swift model
-                do {
-                    // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map { (urlResponse: HTTPURLResponse, data: Data) -> BaseResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
 
-                    
-                    completion(.success(baseResponse))
-                } catch {
-                  // decoding error
-                    completion(.failure(APIError.decodingError))
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
                 }
-              }
-        }.resume()
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
+                
+                do {
+                    let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: data)
+                    return baseResponse
+                } catch {
+                    throw APIError.decodingError
+                }
+            }
     }
     
     
@@ -444,12 +388,12 @@ extension TodosAPI {
     ///   - title: 타이틀
     ///   - isDone: 완료 여부
     ///   - completion: 응답 결과
-    static func editTodoJsonWithObservable(id: Int, title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+    static func editTodoJsonWithObservable(id: Int, title: String, isDone: Bool = false) -> Observable<BaseResponse<Todo>> {
         
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos-json/\(id)"
         guard let url = URL(string: urlString) else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -466,55 +410,43 @@ extension TodosAPI {
             
         }
         catch {
-            return completion(.failure(APIError.jsonEncoding))
+            return Observable.error(APIError.jsonEncoding)
         }
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map { (urlResponse: HTTPURLResponse, data: Data) -> BaseResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+                  
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
+                }
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
 
-            
-            if let jsonData = data {
-                // convert data to our swift model
                 do {
                     // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+                    let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: data)
 
-                    
-                    completion(.success(baseResponse))
+                    return baseResponse
                 } catch {
-                  // decoding error
-                    completion(.failure(APIError.decodingError))
+                    throw APIError.decodingError
                 }
-              }
-        }.resume()
+            }
+
     }
     
     
@@ -527,12 +459,12 @@ extension TodosAPI {
     ///   - title: 타이틀
     ///   - isDone: 완료 여부
     ///   - completion: 응답 결과
-    static func editTodoWithObservable(id: Int, title: String, isDone: Bool = false, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+    static func editTodoWithObservable(id: Int, title: String, isDone: Bool = false) -> Observable<BaseResponse<Todo>> {
         
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos/\(id)"
         guard let url = URL(string: urlString) else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -547,50 +479,38 @@ extension TodosAPI {
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map { (urlResponse: HTTPURLResponse, data: Data) -> BaseResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+                  
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
+                }
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
 
-            
-            if let jsonData = data {
-                // convert data to our swift model
                 do {
                     // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: data)
 
-                    
-                    completion(.success(baseResponse))
+                    return baseResponse
                 } catch {
-                  // decoding error
-                    completion(.failure(APIError.decodingError))
+                    throw APIError.decodingError
                 }
-              }
-        }.resume()
+            }
+
     }
     
     
@@ -601,14 +521,14 @@ extension TodosAPI {
     /// - Parameters:
     ///   - id : 삭제할 아이템 아이디
     ///   - completion: 응답 결과
-    static func deleteATodoWithObservable(id: Int, completion: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) {
+    static func deleteATodoWithObservable(id: Int) -> Observable<BaseResponse<Todo>> {
         
         print(#fileID, #function, #line, "- deleteATodo 호출 됨 / id: \(id)")
         
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos/\(id)"
         guard let url = URL(string: urlString) else {
-            return completion(.failure(APIError.notAllowedUrl))
+            return Observable.error(APIError.notAllowedUrl)
         }
         
         var urlRequest = URLRequest(url: url)
@@ -617,70 +537,55 @@ extension TodosAPI {
         
         // 2. urlSession으로 API를 호출한다
         // 3. API 호출에 대한 응답을 받는다
-        URLSession.shared.dataTask(with: urlRequest) { data, urlResponse, err in
-            print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
-            print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
-            print("err: \(err)")
-            
-            
-            if let error = err {
-                return completion(.failure(APIError.unknown(error)))
-            }
-              
-              // first we have to type cast URLResponse to HTTPURLRepsonse to get access to the status code
-              // we verify the that status code is in the 200 range which signals all went well with the GET request
-            guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                print("bad status code")
-                return completion(.failure(APIError.unknown(nil)))
-            }
-            
-            switch httpResponse.statusCode {
-            case 401:
-                return completion(.failure(APIError.unauthorized))
-            case 204:
-                return completion(.failure(APIError.noContent))
-            default: print("default")
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                return completion(.failure(APIError.badStatus(code: httpResponse.statusCode)))
-            }
-
-            
-            if let jsonData = data {
-                // convert data to our swift model
+        return URLSession.shared.rx.response(request: urlRequest)
+            .map { (urlResponse: HTTPURLResponse, data: Data) -> BaseResponse<Todo> in
+                print("data: \(data)") // 들어오는 실제적인 데이터(JSON 데이터)
+                print("urlResponse: \(urlResponse)") // 호출했을 때 들어오는 모든 내용의 데이터가 담겨있다
+                  
+                guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                    print("bad status code")
+                    throw APIError.unknown(nil)
+                 }
+                
+                switch httpResponse.statusCode {
+                case 401:
+                    throw APIError.unauthorized
+                case 204:
+                    throw APIError.noContent
+                default: print("default")
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.badStatus(code: httpResponse.statusCode)
+                }
+                
                 do {
                     // JSON -> Struct로 변경하고 있는 과정(디코딩, 데이터 파싱)
-                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: jsonData)
+                  let baseResponse = try JSONDecoder().decode(BaseResponse<Todo>.self, from: data)
 
-                    
-                    completion(.success(baseResponse))
+                    return baseResponse
                 } catch {
-                  // decoding error
-                    completion(.failure(APIError.decodingError))
+                    
+                    throw APIError.decodingError
                 }
-              }
-        }.resume()
+            }
     }
     
     
     // 할 일 추가 -> 모든 할 일 가져오기
-    static func addATodoAndFetchTodosWithObservable(title: String, isDone: Bool = false, completion: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) {
-        self.addATodo(title: title) { result in
-            switch result {
-            case .success(_):
-                self.fetchTodos(completion: {
-                    switch $0 {
-                    case .success(let data):
-                        completion(.success(data))
-                    case .failure(let failure):
-                        completion(.failure(failure))
-                    }
-                })
-            case .failure(let failure):
-                completion(.failure(failure))
+    static func addATodoAndFetchTodosWithObservable(title: String, isDone: Bool = false) -> Observable<[Todo]> {
+        
+        // 1
+        return self.addATodoWithObservable(title: title)
+            .flatMapLatest { (response: BaseResponse<Todo>) in
+                self.fetchTodosWithObservable()
             }
-        }
+            .compactMap {$0.data}
+            .catch({ err in
+                print("TodosAPI - catch: err: \(err)")
+                return Observable.just([])
+            })
+            .share(replay: 1)
     }
     
     
