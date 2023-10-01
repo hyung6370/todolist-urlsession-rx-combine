@@ -593,40 +593,38 @@ extension TodosAPI {
     /// - Parameters:
     ///   - selectedTodoIds: 선택된 할일 ID들
     ///   - completion: 실제 삭제가 완료된 ID들
-    static func deleteSelectedTodosWithObservable(selectedTodoIds: [Int], completion: @escaping ([Int]) -> Void) {
+    static func deleteSelectedTodosWithObservable(selectedTodoIds: [Int]) -> Observable<[Int]> {
         
-        let group = DispatchGroup()
+        // 1. 매개변수 배열 -> Observable 스트림 배열
         
-        // 성공적으로 삭제가 이뤄진 ID들
-        var deletedTodoIds: [Int] = [Int]()
-        
-        selectedTodoIds.forEach { aTodoId in
-            
-            // 디스패치 그룹에 넣음
-            group.enter()
-            
-            self.deleteATodo(id: aTodoId, completion: { result in
-                switch result {
-                case .success(let response):
-                    // 삭제된 아이디를 삭제된 아이디 배열에 넣는다
-                    if let todoId = response.data?.id {
-                        deletedTodoIds.append(todoId)
-                        print("inner deleteATodo - success: \(todoId)")
-                    }
-                case .failure(let failure):
-                    print("inner deleteATodo - failure: \(failure)")
-                    
-                }
-                
-                group.leave()
-                
-            }) // 단일 삭제 API 호출
+        // 2, 배열로 단일 API들 호출
+        let apiCallObservables = selectedTodoIds.map { id -> Observable<Int?> in
+            return self.deleteATodoWithObservable(id: id)
+                .map { $0.data?.id } // Int?
+                .catchAndReturn(nil)
+//                .catch { err in
+//                    return Observable.just(nil)
+//                }
         }
         
-        group.notify(queue: .main) {
-            print("모든 API 완료 됨")
-            completion(deletedTodoIds)
+        return Observable.zip(apiCallObservables).map { // Observable<[Int?]>
+            $0.compactMap{ $0 } // Int
+        } // Observable[Int]
+        
+    }
+    
+    static func deleteSelectedTodosWithObservableMerge(selectedTodoIds: [Int]) -> Observable<Int> {
+        
+        // 1. 매개변수 배열 -> Observable 스트림 배열
+        
+        // 2, 배열로 단일 API들 호출
+        let apiCallObservables = selectedTodoIds.map { id -> Observable<Int?> in
+            return self.deleteATodoWithObservable(id: id)
+                .map { $0.data?.id }
+                .catchAndReturn(nil)
         }
+        
+        return Observable.merge(apiCallObservables).compactMap{ $0 }
     }
     
     
@@ -684,4 +682,6 @@ extension TodosAPI {
             completion(.success(fetchedTodos))
         }
     }
+    
+//    static func
 }
