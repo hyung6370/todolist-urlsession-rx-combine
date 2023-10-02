@@ -32,6 +32,7 @@
 		BD9729012AC52578007B679A /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729002AC52578007B679A /* RxCocoa */; };
 		BD9729032AC52578007B679A /* RxCocoa-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729022AC52578007B679A /* RxCocoa-Dynamic */; };
 		BD9729052AC52578007B679A /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729042AC52578007B679A /* RxRelay */; };
+		BD9729072ACA6E63007B679A /* TodosAPI+Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +56,7 @@
 		BD9728D52AC4561E007B679A /* URLRequest+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLRequest+Ext.swift"; sourceTree = "<group>"; };
 		BD9728D72AC46B25007B679A /* TodosAPI+Closure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Closure.swift"; sourceTree = "<group>"; };
 		BD9728F92AC51BB7007B679A /* TodosAPI+Rx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Rx.swift"; sourceTree = "<group>"; };
+		BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Combine.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +153,7 @@
 				BD9728332AC00084007B679A /* TodosAPI.swift */,
 				BD9728D72AC46B25007B679A /* TodosAPI+Closure.swift */,
 				BD9728F92AC51BB7007B679A /* TodosAPI+Rx.swift */,
+				BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -268,6 +271,7 @@
 				BD9728FA2AC51BB7007B679A /* TodosAPI+Rx.swift in Sources */,
 				BD9728A62AC29203007B679A /* URL+Ext.swift in Sources */,
 				BD9727B82AB9DC3C007B679A /* TodoAppTutorialApp.swift in Sources */,
+				BD9729072ACA6E63007B679A /* TodosAPI+Combine.swift in Sources */,
 				BD9727D72ABBF6F6007B679A /* UISearchBarWrapper.swift in Sources */,
 				BD9727D92ABBF8B5007B679A /* TodoRow.swift in Sources */,
 				BD9727CD2ABA98A2007B679A /* TodoCell.swift in Sources */,

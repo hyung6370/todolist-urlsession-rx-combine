@@ -13,18 +13,33 @@ import RxRelay
 
 class TodosVM: ObservableObject {
     
+    // Rx 찌꺼기 담는 용도
     var disposeBag = DisposeBag()
+    
+    // Combine 찌꺼기 담는 용도
+    var subscriptions = Set<AnyCancellable>()
     
     init() {
         print(#fileID, #function, #line, "- ")
         
-        TodosAPI.deleteSelectedTodosWithObservableMerge(selectedTodoIds: [4780, 4719, 4782])
-            .subscribe(onNext: { deletedTodo in
-                print("TodosVM - deleteSelectedTodosWithObservable: deletedTodo: \(deletedTodo)")
-            }, onError: { err in
-                print("TodosVM - deleteSelectedTodosWithObservable: err: \(err)")
-            })
-            .disposed(by: disposeBag)
+        TodosAPI.fetchTodosWithPublisherResult()
+            .sink { result in
+                switch result {
+                case .failure(let failure):
+                    self.handleError(failure)
+                case .success(let baseListTodoResponse):
+                    print("TodosVM - fetchTodosWithPublisherResult: baseListTodoResponse: \(baseListTodoResponse)")
+                }
+            }.store(in: &subscriptions)
+        
+        
+//        TodosAPI.deleteSelectedTodosWithObservableMerge(selectedTodoIds: [4780, 4719, 4782])
+//            .subscribe(onNext: { deletedTodo in
+//                print("TodosVM - deleteSelectedTodosWithObservable: deletedTodo: \(deletedTodo)")
+//            }, onError: { err in
+//                print("TodosVM - deleteSelectedTodosWithObservable: err: \(err)")
+//            })
+//            .disposed(by: disposeBag)
         
 //        TodosAPI.deleteSelectedTodosWithObservable(selectedTodoIds: [4789, 4788, 4787])
 //            .subscribe(onNext: { deletedTodos in
