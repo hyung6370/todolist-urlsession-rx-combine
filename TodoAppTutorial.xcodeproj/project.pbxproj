@@ -33,6 +33,7 @@
 		BD9729032AC52578007B679A /* RxCocoa-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729022AC52578007B679A /* RxCocoa-Dynamic */; };
 		BD9729052AC52578007B679A /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729042AC52578007B679A /* RxRelay */; };
 		BD9729072ACA6E63007B679A /* TodosAPI+Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */; };
+		BD9729422ACAB7F5007B679A /* CombineExt in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729412ACAB7F5007B679A /* CombineExt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 				BD9728FF2AC52578007B679A /* RxBlocking-Dynamic in Frameworks */,
 				BD9729032AC52578007B679A /* RxCocoa-Dynamic in Frameworks */,
 				BD9728A92AC29E94007B679A /* MultipartForm in Frameworks */,
+				BD9729422ACAB7F5007B679A /* CombineExt in Frameworks */,
 				BD9729012AC52578007B679A /* RxCocoa in Frameworks */,
 				BD9728FD2AC52578007B679A /* RxBlocking in Frameworks */,
 			);
@@ -198,6 +200,7 @@
 				BD9729002AC52578007B679A /* RxCocoa */,
 				BD9729022AC52578007B679A /* RxCocoa-Dynamic */,
 				BD9729042AC52578007B679A /* RxRelay */,
+				BD9729412ACAB7F5007B679A /* CombineExt */,
 			);
 			productName = TodoAppTutorial;
 			productReference = BD9727B42AB9DC3C007B679A /* TodoAppTutorial.app */;
@@ -230,6 +233,7 @@
 			packageReferences = (
 				BD9728A72AC29E94007B679A /* XCRemoteSwiftPackageReference "MultipartForm" */,
 				BD9728FB2AC52578007B679A /* XCRemoteSwiftPackageReference "RxSwift" */,
+				BD9729402ACAB7F5007B679A /* XCRemoteSwiftPackageReference "CombineExt" */,
 			);
 			productRefGroup = BD9727B52AB9DC3C007B679A /* Products */;
 			projectDirPath = "";
@@ -498,6 +502,14 @@
 				minimumVersion = 6.6.0;
 			};
 		};
+		BD9729402ACAB7F5007B679A /* XCRemoteSwiftPackageReference "CombineExt" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CombineCommunity/CombineExt.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -530,6 +542,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BD9728FB2AC52578007B679A /* XCRemoteSwiftPackageReference "RxSwift" */;
 			productName = RxRelay;
+		};
+		BD9729412ACAB7F5007B679A /* CombineExt */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD9729402ACAB7F5007B679A /* XCRemoteSwiftPackageReference "CombineExt" */;
+			productName = CombineExt;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

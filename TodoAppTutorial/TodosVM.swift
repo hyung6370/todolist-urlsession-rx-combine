@@ -22,15 +22,52 @@ class TodosVM: ObservableObject {
     init() {
         print(#fileID, #function, #line, "- ")
         
-        TodosAPI.fetchTodosWithPublisherResult()
-            .sink { result in
-                switch result {
+        TodosAPI.deleteSelectedTodosWithPublisherZip(selectedTodoIds: [4639, 4643, 9999, 9888])
+            .sink(receiveCompletion: { [weak self] completion in
+                guard let self = self else { return }
+                
+                switch completion {
                 case .failure(let failure):
                     self.handleError(failure)
-                case .success(let baseListTodoResponse):
-                    print("TodosVM - fetchTodosWithPublisherResult: baseListTodoResponse: \(baseListTodoResponse)")
+                case .finished:
+                    print("TodoVM - finished")
                 }
-            }.store(in: &subscriptions)
+            
+            }, receiveValue: { response in
+                print("TodoVM - response: \(response)")
+            }).store(in: &subscriptions)
+        
+//        TodosAPI.addATodoAndFetchTodosWithPublisherNoErrorSwitchToLatest(title: "연휴 잘보내기22228888813232323222!!")
+//            .sink(receiveCompletion: { [weak self] completion in
+//                guard let self = self else { return }
+//                
+//                switch completion {
+//                case .failure(let failure):
+//                    self.handleError(failure)
+//                case .finished:
+//                    print("TodoVM - finished")
+//                }
+//            
+//            }, receiveValue: { response in
+//                print("TodoVM - response: \(response)")
+//            }).store(in: &subscriptions)
+
+        
+        
+//        TodosAPI.fetchTodosWithPublisher()
+//            .sink(receiveCompletion: { [weak self] completion in
+//                guard let self = self else { return }
+//                
+//                switch completion {
+//                case .failure(let failure):
+//                    self.handleError(failure)
+//                case .finished:
+//                    print("TodoVM - finished")
+//                }
+//            
+//            }, receiveValue: { response in
+//                print("TodoVM - response: \(response)")
+//            }).store(in: &subscriptions)
         
         
 //        TodosAPI.deleteSelectedTodosWithObservableMerge(selectedTodoIds: [4780, 4719, 4782])
