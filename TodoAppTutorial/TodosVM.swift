@@ -22,20 +22,27 @@ class TodosVM: ObservableObject {
     init() {
         print(#fileID, #function, #line, "- ")
         
-        TodosAPI.deleteSelectedTodosWithPublisherZip(selectedTodoIds: [4639, 4643, 9999, 9888])
-            .sink(receiveCompletion: { [weak self] completion in
-                guard let self = self else { return }
-                
-                switch completion {
-                case .failure(let failure):
-                    self.handleError(failure)
-                case .finished:
-                    print("TodoVM - finished")
-                }
-            
-            }, receiveValue: { response in
-                print("TodoVM - response: \(response)")
-            }).store(in: &subscriptions)
+        Task {
+            let response: [Int] = try await TodosAPI.deleteSelectedTodosWithAsyncTaskGroupWithNoError(selectedTodoIds: [4653, 4654, 4655, 4657])
+                print("deleteSelectedTodosWithAsyncTaskGroupWithError response : \(response)")
+        }
+        
+        
+        
+//        TodosAPI.deleteSelectedTodosWithPublisherZip(selectedTodoIds: [4639, 4643, 9999, 9888])
+//            .sink(receiveCompletion: { [weak self] completion in
+//                guard let self = self else { return }
+//                
+//                switch completion {
+//                case .failure(let failure):
+//                    self.handleError(failure)
+//                case .finished:
+//                    print("TodoVM - finished")
+//                }
+//            
+//            }, receiveValue: { response in
+//                print("TodoVM - response: \(response)")
+//            }).store(in: &subscriptions)
         
 //        TodosAPI.addATodoAndFetchTodosWithPublisherNoErrorSwitchToLatest(title: "연휴 잘보내기22228888813232323222!!")
 //            .sink(receiveCompletion: { [weak self] completion in

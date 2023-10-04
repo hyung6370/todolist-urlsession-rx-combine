@@ -34,6 +34,7 @@
 		BD9729052AC52578007B679A /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729042AC52578007B679A /* RxRelay */; };
 		BD9729072ACA6E63007B679A /* TodosAPI+Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */; };
 		BD9729422ACAB7F5007B679A /* CombineExt in Frameworks */ = {isa = PBXBuildFile; productRef = BD9729412ACAB7F5007B679A /* CombineExt */; };
+		BD9729442ACBCD18007B679A /* TodosAPI+Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9729432ACBCD18007B679A /* TodosAPI+Async.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		BD9728D72AC46B25007B679A /* TodosAPI+Closure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Closure.swift"; sourceTree = "<group>"; };
 		BD9728F92AC51BB7007B679A /* TodosAPI+Rx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Rx.swift"; sourceTree = "<group>"; };
 		BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Combine.swift"; sourceTree = "<group>"; };
+		BD9729432ACBCD18007B679A /* TodosAPI+Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodosAPI+Async.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,6 +158,7 @@
 				BD9728D72AC46B25007B679A /* TodosAPI+Closure.swift */,
 				BD9728F92AC51BB7007B679A /* TodosAPI+Rx.swift */,
 				BD9729062ACA6E62007B679A /* TodosAPI+Combine.swift */,
+				BD9729432ACBCD18007B679A /* TodosAPI+Async.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -276,6 +279,7 @@
 				BD9728A62AC29203007B679A /* URL+Ext.swift in Sources */,
 				BD9727B82AB9DC3C007B679A /* TodoAppTutorialApp.swift in Sources */,
 				BD9729072ACA6E63007B679A /* TodosAPI+Combine.swift in Sources */,
+				BD9729442ACBCD18007B679A /* TodosAPI+Async.swift in Sources */,
 				BD9727D72ABBF6F6007B679A /* UISearchBarWrapper.swift in Sources */,
 				BD9727D92ABBF8B5007B679A /* TodoRow.swift in Sources */,
 				BD9727CD2ABA98A2007B679A /* TodoCell.swift in Sources */,
