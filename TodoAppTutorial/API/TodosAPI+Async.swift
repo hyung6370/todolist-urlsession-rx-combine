@@ -816,31 +816,63 @@ extension TodosAPI {
 
     
     
-    /// 선택된 할 일들 가져오기 - Rx 기반 API 동시 처리
+    /// 선택된 할 일들 가져오기 - async 기반 API 동시 처리
     /// - Parameters:
     ///   - selectedTodoIds: 선택된 할일 ID들
     ///   - completion: 응답 결과
-    static func fetchSelectedTodosWithAsync(selectedTodoIds: [Int]) -> AnyPublisher<[Todo], Never> {
+    static func fetchSelectedTodosAsyncNoError(selectedTodoIds: [Int]) async -> [Todo] {
         
-        let apiCallPublishers = selectedTodoIds.map { id -> AnyPublisher<Todo?, Never> in
-            return self.fetchATodoWithPublisher(id: id)
-                .map { $0.data } // Todo?
-                .replaceError(with: nil)
-                .eraseToAnyPublisher()
+        await withTaskGroup(of: Todo?.self) { (group: inout TaskGroup<Todo?>) -> [Todo] in
+            
+            // 각각 자식 async 태스크를 그룹에 넣기
+            for aTodoId in selectedTodoIds {
+                group.addTask(operation: {
+                    do {
+                        // 단일 API 쏘기
+                        let childTaskResult = try await self.fetchATodoWithAsync(id: aTodoId)
+                        return childTaskResult.data
+                    }
+                    catch {
+                        return nil
+                    }
+                })
+            }
+            
+            var fetchedTodos: [Todo] = []
+            
+            for await singleValue in group {
+                if let value = singleValue {
+                    fetchedTodos.append(value) // Todo
+                }
+            }
+            
+            return fetchedTodos
         }
         
-        return apiCallPublishers.zip().map { $0.compactMap{ $0 } }.eraseToAnyPublisher()
     }
     
-    static func fetchSelectedTodosWithAsyncMerge(selectedTodoIds: [Int]) -> AnyPublisher<Todo, Never> {
+    /// 선택된 할 일들 가져오기 - async 기반 API 동시 처리
+    /// - Parameters:
+    ///   - selectedTodoIds: 선택된 할일 ID들
+    ///   - completion: 응답 결과
+    static func fetchSelectedTodosAsyncWithError(selectedTodoIds: [Int]) async throws -> [Todo] {
         
-        let apiCallPublishers = selectedTodoIds.map { id -> AnyPublisher<Todo?, Never> in
-            return self.fetchATodoWithPublisher(id: id)
-                .map { $0.data } // Todo?
-                .replaceError(with: nil)
-                .eraseToAnyPublisher()
+        try await withThrowingTaskGroup(of: Todo?.self) { (group: inout ThrowingTaskGroup<Todo?, Error>) in
+            for aTodoId in selectedTodoIds {
+                group.addTask(operation: {
+                    let childTaskResult = try await self.fetchATodoWithAsync(id: aTodoId)
+                    return childTaskResult.data
+                })
+            }
+            var fetchedTodos: [Todo] = []
+            
+            for try await singleValue in group {
+                if let value = singleValue {
+                    fetchedTodos.append(value) // Todo
+                }
+            }
+            
+            return fetchedTodos
         }
-        
-        return Publishers.MergeMany(apiCallPublishers).compactMap{ $0 }.eraseToAnyPublisher()
     }
 }
