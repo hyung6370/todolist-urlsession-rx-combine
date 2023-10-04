@@ -9,10 +9,12 @@ import Foundation
 import MultipartForm
 
 extension TodosAPI {
+    
     // 모든 할 일 목록 가져오기
     static func fetchTodos(page: Int = 1, completion: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) {
         // 1. urlRequest를 만든다
         let urlString = baseURL + "/todos" + "?page=\(page)"
+            
         guard let url = URL(string: urlString) else {
             return completion(.failure(APIError.notAllowedUrl))
         }
@@ -72,6 +74,74 @@ extension TodosAPI {
                 }
               }
         }.resume()
+    }
+    
+    // 에러 처리 없는 버전 - result
+    // Closure -> Async
+    static func fetchTodosClosureToAsync(page: Int = 1) async -> Result<BaseListResponse<Todo>, APIError> {
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<BaseListResponse<Todo>, APIError>, Never>) in
+            
+            fetchTodos(page: page, completion: { (result: Result<BaseListResponse<Todo>, APIError>) in
+                continuation.resume(returning: result)
+            })
+        }
+    }
+    
+    // 에러 처리 없는 버전 - [Todo] 배열로 반환
+    // Closure -> Async
+    static func fetchTodosClosureToAsyncReturnArray(page: Int = 1) async -> [Todo] {
+        return await withCheckedContinuation { (continuation: CheckedContinuation<[Todo], Never>) in
+            
+            fetchTodos(page: page, completion: { (result: Result<BaseListResponse<Todo>, APIError>) in
+
+                switch result {
+                case .success(let success):
+                    continuation.resume(returning: success.data ?? [])
+                case .failure(let _):
+                    continuation.resume(returning: [])
+                }
+            })
+        }
+    }
+    
+    // 에러 처리 있는 버전
+    // Closure -> Async
+    static func fetchTodosClosureToAsyncWithError(page: Int = 1) async throws -> BaseListResponse<Todo> {
+        
+        return try await withCheckedThrowingContinuation ({ (continuation: CheckedContinuation<BaseListResponse<Todo>, Error>) in
+            
+            fetchTodos(page: page, completion: { (result: Result<BaseListResponse<Todo>, APIError>) in
+                switch result {
+                case .success(let success):
+                    continuation.resume(returning: success)
+                case .failure(let failure):
+                    continuation.resume(throwing: failure)
+                }
+            })
+        })
+    }
+    
+    // 에러 처리 있는 버전 - 에러 형태 변경
+    // Closure -> Async
+    static func fetchTodosClosureToAsyncWithMapError(page: Int = 1) async throws -> BaseListResponse<Todo> {
+        
+        return try await withCheckedThrowingContinuation ({ (continuation: CheckedContinuation<BaseListResponse<Todo>, Error>) in
+            
+            fetchTodos(page: page, completion: { (result: Result<BaseListResponse<Todo>, APIError>) in
+                switch result {
+                case .success(let success):
+                    continuation.resume(returning: success)
+                case .failure(let failure):
+                    
+                    if let decodingErr = failure as? DecodingError {
+                        continuation.resume(throwing: APIError.decodingError)
+                        return
+                    }
+                    
+                    continuation.resume(throwing: failure)
+                }
+            })
+        })
     }
     
     

@@ -23,9 +23,15 @@ class TodosVM: ObservableObject {
         print(#fileID, #function, #line, "- ")
         
         Task {
-            let response: [Int] = try await TodosAPI.deleteSelectedTodosWithAsyncTaskGroupWithNoError(selectedTodoIds: [4653, 4654, 4655, 4657])
-                print("deleteSelectedTodosWithAsyncTaskGroupWithError response : \(response)")
+            let result: [Todo] = await TodosAPI.fetchTodosClosureToAsyncReturnArray(page: 1)
+            print("result: \(result)")
         }
+        
+        
+//        Task {
+//            let response: [Int] = try await TodosAPI.deleteSelectedTodosWithAsyncTaskGroupWithNoError(selectedTodoIds: [4653, 4654, 4655, 4657])
+//                print("deleteSelectedTodosWithAsyncTaskGroupWithError response : \(response)")
+//        }
         
         
         
