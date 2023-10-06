@@ -205,6 +205,61 @@ extension TodosAPI {
         }.resume()
     }
     
+    
+    // 에러 처리 O
+    // 클로저 -> Async
+    static func fetchATodoClosureToAsync(id: Int) async throws -> BaseResponse<Todo> {
+        return try await withCheckedThrowingContinuation ({ (continuation: CheckedContinuation<BaseResponse<Todo>, Error>) in
+            fetchATodo(id: id, completion: { result in
+                switch result {
+                case .success(let success):
+                    continuation.resume(returning: success)
+                case .failure(let failure):
+                    continuation.resume(throwing: failure)
+                }
+            })
+        })
+    }
+    
+    // 에러 처리 X
+    // 클로저 -> Async
+    static func fetchATodoClosureToAsyncNoError(id: Int) async -> BaseResponse<Todo>? {
+        return await withCheckedContinuation ({ (continuation: CheckedContinuation<BaseResponse<Todo>?, Never>) in
+            fetchATodo(id: id, completion: { result in
+                switch result {
+                case .success(let success):
+                    continuation.resume(returning: success)
+                case .failure(let _):
+                    continuation.resume(returning: nil)
+                }
+            })
+        })
+    }
+    
+    
+    // 에러 처리 O - 에러 형태 변경
+    // 클로저 -> Async
+    static func fetchATodoClosureToAsyncMapError(id: Int) async throws -> BaseResponse<Todo> {
+        return try await withCheckedThrowingContinuation ({ (continuation: CheckedContinuation<BaseResponse<Todo>, Error>) in
+            fetchATodo(id: id, completion: { result in
+                switch result {
+                case .success(let success):
+                    continuation.resume(returning: success)
+                case .failure(let failure):
+                    
+                    if let decodingErr = failure as? DecodingError {
+                        continuation.resume(throwing: APIError.decodingError)
+                        return
+                    }
+                    
+                    continuation.resume(throwing: failure)
+                }
+            })
+        })
+    }
+    
+    
+    
     // 할 일 검색하기
     static func searchTodos(searchTerm: String, page: Int = 1, completion: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) {
         // 1. urlRequest를 만든다
