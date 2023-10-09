@@ -21,11 +21,36 @@ class TodosVM: ObservableObject {
     
     init() {
         print(#fileID, #function, #line, "- ")
+  
         
-        Task {
-            let result: [Todo] = await TodosAPI.fetchTodosClosureToAsyncReturnArray(page: 1)
-            print("result: \(result)")
-        }
+        TodosAPI.fetchTodosClosureToPublisherNoError(page: 1)
+            .sink { completion in
+                switch completion {
+                case .failure(let _):
+                    print("failure: ")
+                case .finished:
+                    print("finished")
+                }
+            } receiveValue: { response in
+                print("response: \(response)")
+            }
+            .store(in: &subscriptions)
+
+        
+        
+//        TodosAPI.fetchTodosClosureToObservableDataArray(page: 1)
+//            .subscribe(onNext: { value in
+//                print("value: \(value)")
+//            }, onError: { err in
+//                print("err: \(err)")
+//            })
+//            .disposed(by: disposeBag)
+        
+        
+//        Task {
+//            let result: [Todo] = await TodosAPI.fetchTodosClosureToAsyncReturnArray(page: 1)
+//            print("result: \(result)")
+//        }
         
         
 //        Task {
