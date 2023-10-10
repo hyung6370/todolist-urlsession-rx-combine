@@ -79,77 +79,7 @@ extension TodosAPI {
         }.resume()
     }
     
-    // 에러처리 X - []
-    // Closure -> Publisher
-    static func fetchTodosClosureToPublisherNoError(page: Int = 1) -> AnyPublisher<[Todo], Never> {
-        return Future { (promise: @escaping (Result<[Todo], Never>) -> Void) in
-            
-            fetchTodos(page: page, completion: { result in
-                switch result {
-                case .success(let data):
-                    promise(.success(data.data ?? []))
-                case .failure(let failure):
-                    promise(.success([]))
-                }
-            })
-            
-        }.eraseToAnyPublisher()
-    }
-    
-    
-    
-    // 에러처리 X - []
-    // Closure -> Publisher
-    static func fetchTodosClosureToPublisherReturnArray(page: Int = 1) -> AnyPublisher<[Todo], Never> {
-        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) in
-            
-            fetchTodos(page: page, completion: { result in
-                promise(result)
-            })
-            
-        }
-        .map{ $0.data ?? [] }
-        .catch({ err in
-            return Just([])
-        })
-//        .replaceError(with: [])
-        .eraseToAnyPublisher()
-    }
-    
-    
-    
-    // 에러처리 O
-    // Closure -> Publisher
-    static func fetchTodosClosureToPublisher(page: Int = 1) -> AnyPublisher<BaseListResponse<Todo>, APIError> {
-        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) in
-            
-            fetchTodos(page: page, completion: { result in
-                promise(result)
-            })
-            
-        }.eraseToAnyPublisher()
-    }
-    
-    
-    
-    // 에러처리 O - 에러 형태 변경
-    // Closure -> Publisher
-    static func fetchTodosClosureToPublisherMapError(page: Int = 1) -> AnyPublisher<BaseListResponse<Todo>, APIError> {
-        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) in
-            
-            fetchTodos(page: page, completion: { result in
-                promise(result)
-            })
-            
-        }
-        .mapError({ err in
-            if let urlErr = err as? APIError {
-                return APIError.unauthorized
-            }
-            return err
-        })
-        .eraseToAnyPublisher()
-    }
+
     
     
     // 특정 할 일 가져오기
@@ -1026,5 +956,98 @@ extension TodosAPI {
             }
             return response.data
         }
+    }
+}
+
+
+
+// MARK: - Closure -> Publisher
+extension TodosAPI {
+    
+    // 에러 처리 O
+    // Closure -> Publisher
+    static func fetchATodoClosureToPublihser(id: Int) -> AnyPublisher<Todo?, Never> {
+        
+        return Future { (promise: @escaping (Result<BaseResponse<Todo>, APIError>) -> Void) in
+            fetchATodo(id: id, completion: {
+                promise($0)
+            })
+        }
+        .map{ $0.data }
+        .replaceError(with: nil)
+        .eraseToAnyPublisher()
+    }
+    
+    
+    // 에러처리 X - []
+    // Closure -> Publisher
+    static func fetchTodosClosureToPublisherNoError(page: Int = 1) -> AnyPublisher<[Todo], Never> {
+        return Future { (promise: @escaping (Result<[Todo], Never>) -> Void) in
+            
+            fetchTodos(page: page, completion: { result in
+                switch result {
+                case .success(let data):
+                    promise(.success(data.data ?? []))
+                case .failure(let failure):
+                    promise(.success([]))
+                }
+            })
+            
+        }.eraseToAnyPublisher()
+    }
+    
+    
+    
+    // 에러처리 X - []
+    // Closure -> Publisher
+    static func fetchTodosClosureToPublisherReturnArray(page: Int = 1) -> AnyPublisher<[Todo], Never> {
+        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) in
+            
+            fetchTodos(page: page, completion: { result in
+                promise(result)
+            })
+            
+        }
+        .map{ $0.data ?? [] }
+        .catch({ err in
+            return Just([])
+        })
+//        .replaceError(with: [])
+        .eraseToAnyPublisher()
+    }
+    
+    
+    
+    // 에러처리 O
+    // Closure -> Publisher
+    static func fetchTodosClosureToPublisher(page: Int = 1) -> AnyPublisher<BaseListResponse<Todo>, APIError> {
+        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) in
+            
+            fetchTodos(page: page, completion: { result in
+                promise(result)
+            })
+            
+        }.eraseToAnyPublisher()
+    }
+    
+    
+    
+    // 에러처리 O - 에러 형태 변경
+    // Closure -> Publisher
+    static func fetchTodosClosureToPublisherMapError(page: Int = 1) -> AnyPublisher<BaseListResponse<Todo>, APIError> {
+        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, APIError>) -> Void) in
+            
+            fetchTodos(page: page, completion: { result in
+                promise(result)
+            })
+            
+        }
+        .mapError({ err in
+            if let urlErr = err as? APIError {
+                return APIError.unauthorized
+            }
+            return err
+        })
+        .eraseToAnyPublisher()
     }
 }

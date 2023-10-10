@@ -876,3 +876,71 @@ extension TodosAPI {
         }
     }
 }
+
+
+// MARK: - Async to Combine
+extension TodosAPI {
+    
+    static func fetchTodosAsyncToPublisher(page: Int) -> AnyPublisher<BaseListResponse<Todo>, Error> {
+        
+        return Future { (promise: @escaping (Result<BaseListResponse<Todo>, Error>) -> Void) in
+            Task {
+                do {
+                    let asyncResult = try await fetchTodosWithAsync(page: page)
+                    
+                    promise(.success(asyncResult))
+                }
+                catch {
+                    
+                    promise(.failure(error))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    
+    static func genericAsyncToPublisher<T>(asyncWork: @escaping () async throws -> T) -> AnyPublisher<T, Error> {
+        
+        return Future { (promise: @escaping (Result<T, Error>) -> Void) in
+            Task {
+                do {
+                    let asyncResult = try await asyncWork()
+                    
+                    promise(.success(asyncResult))
+                }
+                catch {
+                    
+                    promise(.failure(error))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+}
+
+
+extension Publisher {
+    
+    func mapAsync<T>(asyncWork: @escaping (Output) async throws -> T) -> Publishers.FlatMap<Future<T, Error>, Publishers.SetFailureType<Self, Error>> {
+        
+        return flatMap { output in
+            return Future { (promise: @escaping (Result<T, Error>) -> Void) in
+                Task {
+                    do {
+                        let asyncResult = try await asyncWork(output)
+                        
+                        promise(.success(asyncResult))
+                    }
+                    catch {
+                        
+                        promise(.failure(error))
+                    }
+                }
+            }
+        }
+        
+        
+    }
+}

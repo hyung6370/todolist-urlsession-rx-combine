@@ -660,3 +660,53 @@ extension TodosAPI {
         return Observable.merge(apiCallObservables).compactMap { $0 }
     }
 }
+
+extension TodosAPI {
+    
+    static func fetchTodosWithObservableToAsync(page: Int = 1) async throws -> BaseListResponse<Todo> {
+        
+        return try await withCheckedThrowingContinuation ({ (continuation: CheckedContinuation<BaseListResponse<Todo>, Error>) in
+            
+            var disposable: Disposable? = nil
+            
+            disposable = fetchTodosWithObservable(page: page)
+                .subscribe(onNext: { response in
+                    print("onNext: \(response)")
+                    continuation.resume(returning: response)
+                }, onError: { err in
+                    print("onError: \(err)")
+                    continuation.resume(throwing: err)
+                }, onCompleted: {
+                    print("onCompleted")
+                    disposable?.dispose()
+                }, onDisposed: {
+                    print("onDisposed")
+                })
+        })
+    }
+}
+
+extension ObservableType {
+    
+    func toAsync() async throws -> Element {
+        
+        return try await withCheckedThrowingContinuation ({ (continuation: CheckedContinuation<Element, Error>) in
+            
+            var disposable: Disposable? = nil
+            
+            disposable = single()
+                .subscribe(onNext: { response in
+                    print("onNext: \(response)")
+                    continuation.resume(returning: response)
+                }, onError: { err in
+                    print("onError: \(err)")
+                    continuation.resume(throwing: err)
+                }, onCompleted: {
+                    print("onCompleted")
+                    disposable?.dispose()
+                }, onDisposed: {
+                    print("onDisposed")
+                })
+        })
+    }
+}

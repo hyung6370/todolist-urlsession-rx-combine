@@ -10,6 +10,7 @@ import Combine
 import RxSwift
 import RxCocoa
 import RxRelay
+import RxCombine
 
 class TodosVM: ObservableObject {
     
@@ -21,20 +22,105 @@ class TodosVM: ObservableObject {
     
     init() {
         print(#fileID, #function, #line, "- ")
-  
         
-        TodosAPI.fetchTodosClosureToPublisherNoError(page: 1)
+        Just(1)
+            .mapAsync { value in
+                try await TodosAPI.fetchTodosWithAsync(page: value)
+            }
             .sink { completion in
                 switch completion {
-                case .failure(let _):
-                    print("failure: ")
                 case .finished:
                     print("finished")
+                case .failure(let failure):
+                    print("failed: \(failure)")
                 }
             } receiveValue: { response in
                 print("response: \(response)")
-            }
-            .store(in: &subscriptions)
+            }.store(in: &subscriptions)
+        
+        
+//        TodosAPI.genericAsyncToPublisher(asyncWork: {
+//            try await TodosAPI.fetchTodosWithAsync(page: 1)
+//        })
+//        .sink { completion in
+//            switch completion {
+//            case .finished:
+//                print("finished")
+//            case .failure(let failure):
+//                print("failed: \(failure)")
+//            }
+//        } receiveValue: { response in
+//            print("response: \(response)")
+//        }.store(in: &subscriptions)
+        
+  
+//        TodosAPI.fetchTodosAsyncToPublisher(page: 1)
+//            .sink { completion in
+//                switch completion {
+//                case .finished:
+//                    print("finished")
+//                case .failure(let failure):
+//                    print("failed: \(failure)")
+//                }
+//            } receiveValue: { response in
+//                print("response: \(response)")
+//            }.store(in: &subscriptions)
+        
+        
+//        TodosAPI.fetchTodosWithPublisher(page: 1)
+//            .asObservable()
+//            .subscribe(onNext: {
+//                print("onNext: \($0)")
+//            }, onError: {
+//                print("onError: \($0)")
+//            }, onCompleted: {
+//                print("onComplete")
+//            }, onDisposed: {
+//                print("onDisposed")
+//            })
+//            .disposed(by: disposeBag)
+//        
+
+        
+//        TodosAPI.fetchTodosWithObservable(page: 1)
+//            .publisher
+//            .sink { completion in
+//                switch completion {
+//                case .finished:
+//                    print("finished")
+//                case .failure(let failure):
+//                    print("failed: \(failure)")
+//                }
+//            } receiveValue: { response in
+//                print("response: \(response)")
+//            }.store(in: &subscriptions)
+
+        
+        
+//        Task {
+//            do {
+//                let result = try await TodosAPI.fetchTodosWithObservable(page: 1).toAsync()
+//                print("result: \(result)")
+//            }
+//            catch {
+//                print("catched error: \(error)")
+//            }
+//        }
+        
+  
+        
+//        TodosAPI.fetchTodosClosureToPublisherNoError(page: 1)
+//            .sink { completion in
+//                switch completion {
+//                case .failure(let _):
+//                    print("failure: ")
+//                case .finished:
+//                    print("finished")
+//                }
+//            } receiveValue: { response in
+//                print("response: \(response)")
+//            }
+//            .store(in: &subscriptions)
 
         
         
