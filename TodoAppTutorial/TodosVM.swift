@@ -23,20 +23,23 @@ class TodosVM: ObservableObject {
     init() {
         print(#fileID, #function, #line, "- ")
         
-        Just(1)
-            .mapAsync { value in
-                try await TodosAPI.fetchTodosWithAsync(page: value)
-            }
-            .sink { completion in
-                switch completion {
-                case .finished:
-                    print("finished")
-                case .failure(let failure):
-                    print("failed: \(failure)")
-                }
-            } receiveValue: { response in
-                print("response: \(response)")
-            }.store(in: &subscriptions)
+        
+        
+        
+//        Just(1)
+//            .mapAsync { value in
+//                try await TodosAPI.fetchTodosWithAsync(page: value)
+//            }
+//            .sink { completion in
+//                switch completion {
+//                case .finished:
+//                    print("finished")
+//                case .failure(let failure):
+//                    print("failed: \(failure)")
+//                }
+//            } receiveValue: { response in
+//                print("response: \(response)")
+//            }.store(in: &subscriptions)
         
         
 //        TodosAPI.genericAsyncToPublisher(asyncWork: {
@@ -66,19 +69,19 @@ class TodosVM: ObservableObject {
 //                print("response: \(response)")
 //            }.store(in: &subscriptions)
         
-        
-//        TodosAPI.fetchTodosWithPublisher(page: 1)
-//            .asObservable()
-//            .subscribe(onNext: {
-//                print("onNext: \($0)")
-//            }, onError: {
-//                print("onError: \($0)")
-//            }, onCompleted: {
-//                print("onComplete")
-//            }, onDisposed: {
-//                print("onDisposed")
-//            })
-//            .disposed(by: disposeBag)
+        Observable
+            .just(1)
+            .mapAsync { try await TodosAPI.fetchTodosWithAsync(page: $0) }
+            .subscribe(onNext: {
+                print("onNext: \($0)")
+            }, onError: {
+                print("onError: \($0)")
+            }, onCompleted: {
+                print("onComplete")
+            }, onDisposed: {
+                print("onDisposed")
+            })
+            .disposed(by: disposeBag)
 //        
 
         
